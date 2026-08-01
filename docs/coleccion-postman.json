@@ -1,0 +1,103 @@
+{
+  "info": {
+    "name": "Trabajo Integrador - API Tareas",
+    "description": "Colección de pruebas para la API REST de tareas y usuarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Registrar Usuario",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Maria Gomez\",\n  \"email\": \"maria.gomez2@gmail.com\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "2. Obtener Todas las Tareas (GET)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "miTokenSecreto123" }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/tareas",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "tareas"]
+        }
+      }
+    },
+    {
+      "name": "3. Crear Tarea (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "miTokenSecreto123" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Finalizar Trabajo Integrador\",\n  \"descripcion\": \"Probar conexion de endpoints en la base de datos integrador-tareas\",\n  \"completada\": false,\n  \"prioridad\": \"alta\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/tareas",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "tareas"]
+        }
+      }
+    },
+    {
+      "name": "4. Actualizar Tarea por ID (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "miTokenSecreto123" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Finalizar Trabajo Integrador\",\n  \"descripcion\": \"Probar conexion de endpoints en la base de datos integrador-tareas\",\n  \"completada\": true,\n  \"prioridad\": \"alta\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/tareas/6a6e27bb6e6397f11c237aa7",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "tareas", "6a6e27bb6e6397f11c237aa7"]
+        }
+      }
+    },
+    {
+      "name": "5. Eliminar Tarea por ID (DELETE)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "miTokenSecreto123" }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/tareas/6a6e27bb6e6397f11c237aa7",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "tareas", "6a6e27bb6e6397f11c237aa7"]
+        }
+      }
+    }
+  ]
+}
