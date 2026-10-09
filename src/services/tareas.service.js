@@ -1,8 +1,43 @@
 const tareasRepository = require('../repositories/tareas.repository');
 const HttpError = require('../utils/HttpError');
 
-const obtenerTodas = async (filtro) => {
-  return await tareasRepository.findAll(filtro);
+const PRIORIDADES = ['baja', 'media', 'alta'];
+
+const escaparRegex = (texto) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Arma el filtro de Mongo a partir de la query (?prioridad=&completada=&q=).
+// Solo se aceptan estos tres filtros, validados: nada más llega a la base.
+const construirFiltro = ({ prioridad, completada, q } = {}) => {
+  const filtro = {};
+
+  if (prioridad !== undefined && prioridad !== '') {
+    if (!PRIORIDADES.includes(prioridad)) {
+      throw new HttpError(400, "La prioridad debe ser baja, media o alta");
+    }
+    filtro.prioridad = prioridad;
+  }
+
+  if (completada !== undefined && completada !== '') {
+    if (completada !== 'true' && completada !== 'false') {
+      throw new HttpError(400, "El filtro completada debe ser true o false");
+    }
+    filtro.completada = completada === 'true';
+  }
+
+  if (q !== undefined && q !== '') {
+    if (typeof q !== 'string') {
+      throw new HttpError(400, "La búsqueda debe ser un texto");
+    }
+    if (q.trim() !== '') {
+      filtro.titulo = { $regex: escaparRegex(q.trim()), $options: 'i' };
+    }
+  }
+
+  return filtro;
+};
+
+const obtenerTodas = async (query) => {
+  return await tareasRepository.findAll(construirFiltro(query));
 };
 
 const crearTarea = async (data) => {
@@ -28,4 +63,67 @@ const eliminarTarea = async (id) => {
   return await tareasRepository.deleteById(id);
 };
 
-module.exports = { obtenerTodas, crearTarea, actualizarTarea, eliminarTarea };
+// ---- Reglas de negocio ----
+
+// Una tarea solo se puede completar una vez: se guarda cuándo se completó.
+const completarTarea = async (id) => {
+  const tarea = await tareasRepository.findById(id);
+  if (!tarea) {
+    throw new HttpError(404, "Tarea no encontrada");
+  }
+  if (tarea.completada) {
+    throw new HttpError(409, "La tarea ya está completada");
+  }
+  return await tareasRepository.update(id, {
+    completada: true,
+    fechaCompletada: new Date()
+  });
+};
+
+// Solo se puede reabrir una tarea que estaba completada.
+const reabrirTarea = async (id) => {
+  const tarea = await tareasRepository.findById(id);
+  if (!tarea) {
+    throw new HttpError(404, "Tarea no encontrada");
+  }
+  if (!tarea.completada) {
+    throw new HttpError(409, "La tarea todavía no está completada");
+  }
+  return await tareasRepository.update(id, {
+    completada: false,
+    fechaCompletada: null
+  });
+};
+
+// Números para el panel de resumen de la interfaz.
+const obtenerResumen = async () => {
+  const [total, completadas, pendientesAlta, porPrioridad] = await Promise.all([
+    tareasRepository.count({}),
+    tareasRepository.count({ completada: true }),
+    tareasRepository.count({ completada: false, prioridad: "alta" }),
+    tareasRepository.countByPrioridad()
+  ]);
+
+  const prioridades = { baja: 0, media: 0, alta: 0 };
+  porPrioridad.forEach(({ _id, total: cantidad }) => {
+    if (_id in prioridades) prioridades[_id] = cantidad;
+  });
+
+  return {
+    total,
+    completadas,
+    pendientes: total - completadas,
+    pendientesAltaPrioridad: pendientesAlta,
+    porPrioridad: prioridades
+  };
+};
+
+module.exports = {
+  obtenerResumen,
+  obtenerTodas,
+  crearTarea,
+  actualizarTarea,
+  eliminarTarea,
+  completarTarea,
+  reabrirTarea
+};

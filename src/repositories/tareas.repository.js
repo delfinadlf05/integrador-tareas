@@ -1,9 +1,12 @@
 const Tarea = require('../models/Tarea');
 
-const findAll = async (filtro = {}) => await Tarea.find(filtro);
+const findAll = async (filtro = {}) => await Tarea.find(filtro).sort({ createdAt: -1 });
 const findById = async (id) => await Tarea.findById(id);
 const create = async (data) => await Tarea.create(data);
 const update = async (id, data) => await Tarea.findByIdAndUpdate(id, data, { new: true });
 const deleteById = async (id) => await Tarea.findByIdAndDelete(id);
+const count = async (filtro = {}) => await Tarea.countDocuments(filtro);
+const countByPrioridad = async () =>
+  await Tarea.aggregate([{ $group: { _id: '$prioridad', total: { $sum: 1 } } }]);
 
-module.exports = { findAll, findById, create, update, deleteById };
+module.exports = { findAll, findById, create, update, deleteById, count, countByPrioridad };

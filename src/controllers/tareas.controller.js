@@ -36,9 +36,39 @@ const deleteTarea = async (req, res, next) => {
   }
 };
 
-module.exports = { 
-  getTareas, 
-  createTarea, 
-  updateTarea, 
-  deleteTarea 
+const completarTarea = async (req, res, next) => {
+  try {
+    const tarea = await tareasService.completarTarea(req.params.id);
+    res.json(tarea);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const reabrirTarea = async (req, res, next) => {
+  try {
+    const tarea = await tareasService.reabrirTarea(req.params.id);
+    res.json(tarea);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getResumen = async (req, res, next) => {
+  try {
+    const resumen = await tareasService.obtenerResumen();
+    res.json(resumen);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getResumen,
+  getTareas,
+  createTarea,
+  updateTarea,
+  deleteTarea,
+  completarTarea,
+  reabrirTarea
 };
