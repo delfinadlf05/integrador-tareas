@@ -54,7 +54,17 @@ const reabrirTarea = async (req, res, next) => {
   }
 };
 
+const getResumen = async (req, res, next) => {
+  try {
+    const resumen = await tareasService.obtenerResumen();
+    res.json(resumen);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
+  getResumen,
   getTareas,
   createTarea,
   updateTarea,

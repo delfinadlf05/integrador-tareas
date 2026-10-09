@@ -95,7 +95,31 @@ const reabrirTarea = async (id) => {
   });
 };
 
+// Números para el panel de resumen de la interfaz.
+const obtenerResumen = async () => {
+  const [total, completadas, pendientesAlta, porPrioridad] = await Promise.all([
+    tareasRepository.count({}),
+    tareasRepository.count({ completada: true }),
+    tareasRepository.count({ completada: false, prioridad: "alta" }),
+    tareasRepository.countByPrioridad()
+  ]);
+
+  const prioridades = { baja: 0, media: 0, alta: 0 };
+  porPrioridad.forEach(({ _id, total: cantidad }) => {
+    if (_id in prioridades) prioridades[_id] = cantidad;
+  });
+
+  return {
+    total,
+    completadas,
+    pendientes: total - completadas,
+    pendientesAltaPrioridad: pendientesAlta,
+    porPrioridad: prioridades
+  };
+};
+
 module.exports = {
+  obtenerResumen,
   obtenerTodas,
   crearTarea,
   actualizarTarea,
