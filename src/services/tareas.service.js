@@ -63,4 +63,43 @@ const eliminarTarea = async (id) => {
   return await tareasRepository.deleteById(id);
 };
 
-module.exports = { obtenerTodas, crearTarea, actualizarTarea, eliminarTarea };
+// ---- Reglas de negocio ----
+
+// Una tarea solo se puede completar una vez: se guarda cuándo se completó.
+const completarTarea = async (id) => {
+  const tarea = await tareasRepository.findById(id);
+  if (!tarea) {
+    throw new HttpError(404, "Tarea no encontrada");
+  }
+  if (tarea.completada) {
+    throw new HttpError(409, "La tarea ya está completada");
+  }
+  return await tareasRepository.update(id, {
+    completada: true,
+    fechaCompletada: new Date()
+  });
+};
+
+// Solo se puede reabrir una tarea que estaba completada.
+const reabrirTarea = async (id) => {
+  const tarea = await tareasRepository.findById(id);
+  if (!tarea) {
+    throw new HttpError(404, "Tarea no encontrada");
+  }
+  if (!tarea.completada) {
+    throw new HttpError(409, "La tarea todavía no está completada");
+  }
+  return await tareasRepository.update(id, {
+    completada: false,
+    fechaCompletada: null
+  });
+};
+
+module.exports = {
+  obtenerTodas,
+  crearTarea,
+  actualizarTarea,
+  eliminarTarea,
+  completarTarea,
+  reabrirTarea
+};
