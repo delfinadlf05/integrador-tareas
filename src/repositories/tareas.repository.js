@@ -1,6 +1,6 @@
 const Tarea = require('../models/Tarea');
 
-const findAll = async (filtro = {}) => await Tarea.find(filtro);
+const findAll = async (filtro = {}) => await Tarea.find(filtro).sort({ createdAt: -1 });
 const findById = async (id) => await Tarea.findById(id);
 const create = async (data) => await Tarea.create(data);
 const update = async (id, data) => await Tarea.findByIdAndUpdate(id, data, { new: true });
